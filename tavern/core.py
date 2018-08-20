@@ -167,8 +167,12 @@ def run_stage(sessions, stage, tavern_box, test_block_config):
 
     delay(stage, "before")
 
+    test_block_config["tavern_internal"]["pytest_hook_caller"].pytest_tavern_before_request(stage)
+
     logger.info("Running stage : %s", name)
     response = r.run()
+
+    test_block_config["tavern_internal"]["pytest_hook_caller"].pytest_tavern_after_request(stage)
 
     verifiers = get_verifiers(stage, test_block_config, sessions, expected)
     for v in verifiers:
