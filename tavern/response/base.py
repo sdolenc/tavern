@@ -122,12 +122,3 @@ class BaseResponse(object):
                 msg = "Checking keys worked using 'legacy' comparison, which will not match dictionary keys at the top level of the response. This behaviour will be changed in a future version"
                 warnings.warn(msg, FutureWarning)
                 logger.warning(msg, exc_info=True)
-
-    def get_parsed_response(self, response):
-        """Get a dict/list representation of the response
-
-        Should be overridden by plugins, but it's not _required_ because it
-        might not be used
-        """
-        logger.warning("get_parsed_response not overridden for %s - no useful information can be logged about this response", type(self))
-        return {}
