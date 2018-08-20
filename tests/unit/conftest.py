@@ -1,3 +1,4 @@
+from mock import Mock
 import pytest
 
 
@@ -35,7 +36,10 @@ def fix_example_includes():
                     "content-type": "application/json",
                 }
             }
-        }]
+        }],
+        "tavern_internal": {
+            "pytest_hook_caller": Mock(),
+        }
     }
 
     return includes.copy()

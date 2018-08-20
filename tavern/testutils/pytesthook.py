@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 match_tavern_file = re.compile(r'.+\.tavern\.ya?ml$').match
 
 
+def pytest_addhooks(pluginmanager):
+    """Add our custom tavern hooks"""
+    from . import newhooks
+    pluginmanager.add_hookspecs(newhooks)
+
+
 def pytest_collect_file(parent, path):
     """On collecting files, get any files that end in .tavern.yaml or .tavern.yml as tavern
     test files
@@ -400,6 +406,10 @@ class YamlItem(pytest.Item):
         self.global_cfg.setdefault("variables", {})
 
         load_plugins(self.global_cfg)
+
+        self.global_cfg["tavern_internal"] = {
+            "pytest_hook_caller": self.config.hook,
+        }
 
         # INTERNAL
         # NOTE - now that we can 'mark' tests, we could use pytest.mark.xfail

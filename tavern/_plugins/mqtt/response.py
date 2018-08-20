@@ -6,6 +6,7 @@ from tavern.schemas.extensions import get_wrapped_response_function
 from tavern.util import exceptions
 from tavern.response.base import BaseResponse
 from tavern.util.dict_util import check_keys_match_recursive
+from .util import get_paho_mqtt_response_information
 
 try:
     LoadException = json.decoder.JSONDecodeError
@@ -26,6 +27,8 @@ class MQTTResponse(BaseResponse):
         self.name = name
 
         payload = expected.get("payload")
+
+        self.test_block_config = test_block_config
 
         self.validate_function = None
         if isinstance(payload, dict):
@@ -82,6 +85,8 @@ class MQTTResponse(BaseResponse):
             self.received_messages.append(msg)
 
             msg.payload = msg.payload.decode("utf8")
+
+            self.test_block_config["tavern_internal"]["pytest_hook_caller"].pytest_tavern_log_response(get_paho_mqtt_response_information(msg))
 
             if json_payload:
                 try:
