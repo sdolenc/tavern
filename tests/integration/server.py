@@ -1,5 +1,8 @@
 import math
+import mimetypes
 import os
+import time
+
 from flask import Flask, request, jsonify, Response
 
 
@@ -25,6 +28,16 @@ def verify():
         return '', 200
     else:
         return '', 401
+
+
+@app.route("/get_thing_slow", methods=["GET"])
+def get_slow():
+    time.sleep(0.25)
+
+    response = {
+        "status": "OK",
+    }
+    return jsonify(response), 200
 
 
 @app.route("/fake_dictionary", methods=["GET"])
@@ -80,6 +93,16 @@ def nested_list_response():
 def upload_fake_file():
     if not request.files:
         return '', 401
+
+    if not mimetypes.inited:
+        mimetypes.init()
+
+    for key, item in request.files.items():
+        if item.filename:
+            filetype = ".{}".format(item.filename.split(".")[-1])
+            if filetype in mimetypes.suffix_map:
+                if not item.content_type:
+                    return "", 400
 
     # Try to download each of the files downloaded to /tmp and
     # then remove them
