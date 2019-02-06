@@ -1,12 +1,18 @@
 import sys
 from urllib.parse import urlparse
-from coreapi import Client
+from coreapi import Client, codecs, exceptions
 import yaml
 
 
 def generate_tavern_yaml(json_path):
-    client = Client()
-    d = client.get(json_path, format="openapi")
+    try:
+        client = Client()
+        d = client.get(json_path, format="openapi")
+    except exceptions.NetworkError:
+        # local file?
+        codec = codecs.CoreJSONCodec()
+        bytestring = open(json_path, 'rb').read()
+        d = codec.decode(bytestring, format="openapi")
 
     output_yaml(d.links)
     for routes in d.data.keys():
