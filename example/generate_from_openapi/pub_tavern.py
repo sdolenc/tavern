@@ -8,27 +8,33 @@ import yaml
 
 
 def generate_tavern_yaml(json_path):
-    try:
-        client = Client()
-        d = client.get(json_path, format="openapi")
-    except ValueError:
-        # this sometimes happens when this script
-        # is run as a binary (with pyinstaller)
-        # the workaround is to simply download
-        # the remote file to RAM.
-        codec = OpenAPICodec()
-        with urlopen(json_path) as response:
-            bytestring = response.read()
-        d = codec.decode(bytestring, format="openapi")
-    except exceptions.NetworkError:
-        # a path to a local file was given.
-        codec = OpenAPICodec()
-        bytestring = open(Path(json_path).resolve(), 'rb').read()
-        d = codec.decode(bytestring, format="openapi")
+    d = input_json_doc(json_path)
 
     output_yaml(d.links)
     for routes in d.data.keys():
         output_yaml(d.data[routes], routes)
+
+
+def input_json_doc(json_path):
+    try:
+        # try as local file was given.
+        codec = OpenAPICodec()
+        bytestring = open(Path(json_path).resolve(), 'rb').read()
+        d = codec.decode(bytestring, format="openapi")
+    except:
+        try:
+            client = Client()
+            d = client.get(json_path, format="openapi")
+        except ValueError:
+            # this sometimes happens when this script
+            # is run as a binary (with pyinstaller)
+            # the workaround is to simply download
+            # the remote file to RAM.
+            codec = OpenAPICodec()
+            with urlopen(json_path) as response:
+                bytestring = response.read()
+            d = codec.decode(bytestring, format="openapi")
+    return d
 
 
 def output_yaml(links, prefix=""):
