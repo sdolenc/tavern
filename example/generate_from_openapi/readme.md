@@ -2,4 +2,5 @@ example script to autogenerate the travern yaml test file from a given openapi.j
 
 To run: 
 pip install pipenv
+pipenv install
 pipenv run pub_tavern.py 

@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
+from urllib.request import urlopen
 from coreapi import Client, exceptions
 from openapi_codec import OpenAPICodec
 import yaml
@@ -10,8 +11,17 @@ def generate_tavern_yaml(json_path):
     try:
         client = Client()
         d = client.get(json_path, format="openapi")
+    except ValueError:
+        # this sometimes happens when this script
+        # is run as a binary (with pyinstaller)
+        # the workaround is to simply download
+        # the remote file to RAM.
+        codec = OpenAPICodec()
+        with urlopen(json_path) as response:
+            bytestring = response.read()
+        d = codec.decode(bytestring, format="openapi")
     except exceptions.NetworkError:
-        # local file
+        # a path to a local file was given.
         codec = OpenAPICodec()
         bytestring = open(Path(json_path).resolve(), 'rb').read()
         d = codec.decode(bytestring, format="openapi")
@@ -70,7 +80,7 @@ def get_name(prefix, test_name, action, url):
 
 
 def display_help():
-    print("pub_tavern.py <url to openapi.json>")
+    print("pub_tavern.py <file or url to openapi.json>")
     print(
         "eg: pub_tavern.py https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-simple.json"
     )
